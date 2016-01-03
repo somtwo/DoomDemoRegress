@@ -1,0 +1,9 @@
+{
+	"executable": "D:\\games\\doom\\eternity\\eternity.exe",
+	"demoswitch": "-timedemo",
+	"loggingswitch": "-levellog",
+	"additionaloptions": "-nodraw -nosound -nowait"
+	"iwads": [
+		"doom2.wad": "D:\\games\\doom\\doom2.wad"
+	]
+}
