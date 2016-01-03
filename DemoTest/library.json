@@ -1,8 +1,23 @@
 [
 	{
+		"testname": "doom2-demo1"
 		"demoname": "DEMO1",
 		"iwad": "doom2.wad",
 		"pwads": [],
-		"logfile": "doom2_demo1.txt"
+		"logfile": "Cannon\\doom2-demo1.txt"
+	},
+	{
+		"testname": "doom2-demo2"
+		"demoname": "DEMO2",
+		"iwad": "doom2.wad",
+		"pwads": [],
+		"logfile": "Cannon\\doom2-demo2.txt"
+	},
+	{
+		"testname": "doom2-demo2"
+		"demoname": "DEMO3",
+		"iwad": "doom2.wad",
+		"pwads": [],
+		"logfile": "Cannon\\doom2-demo3.txt"
 	}
 ]

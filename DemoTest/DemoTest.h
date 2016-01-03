@@ -3,6 +3,8 @@
 
 typedef struct
 {
+	char *testName;
+
 	char *demoName;
 
 	char *iWad;

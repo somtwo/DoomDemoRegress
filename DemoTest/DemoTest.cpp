@@ -29,14 +29,47 @@ char *BuildCommand(Test *test, Target *target, char* outputFile)
 		return NULL;
 	}
 
-	sprintf(buffer, "\"%s\" -iwad \"%s\" %s %s %s \"%s\" %s", target->executable, target->iwads[i]->path, target->demoSwitch, test->demoName, target->logSwitch, outputFile, target->additionaloptions);
-	// TODO: Build actual command
+	sprintf(buffer, "\"%s\" -iwad %s %s %s %s %s %s", target->executable, target->iwads[i]->path, target->demoSwitch, test->demoName, target->logSwitch, outputFile, target->additionaloptions);
 	return strdup(buffer);
 }
 
 int CompareResults(char *cannon, char *test)
 {
-	return 0;
+	char cbuffer[1024];
+	char tbuffer[1024];
+
+	FILE *cannonFile = fopen(cannon, "r");
+	FILE *testFile = fopen(test, "r");
+
+	bool success = true;
+	int lineNumber = 1;
+
+	while (1)
+	{
+		char *cline = fgets(cbuffer, 1024, cannonFile);
+		char *tline = fgets(tbuffer, 1024, testFile);
+
+		if (cline == NULL || tline == NULL)
+		{
+			if (cline != tline)
+				success = false;
+
+			break;
+		}
+
+		if (stricmp(cline, tline) != 0)
+		{
+			success = false;
+			break;
+		}
+
+		lineNumber++;
+	}
+
+	fclose(cannonFile);
+	fclose(testFile);
+
+	return success ? 0 : lineNumber;
 }
 
 void MoveToErrorFolder(char *fileName)
@@ -49,30 +82,42 @@ void DeleteTestFile(char *fileName)
 	assert(remove(fileName) == 0, "Failed to delete file.");
 }
 
-void RunTest(Test *test, Target *target)
+bool RunTest(Test *test, Target *target)
 {
-	char *testOutput = "t_doom2_demo1.txt";
+	char buffer[1024];
+	sprintf(buffer, "t_%s.txt", test->testName);
+
+	char *testOutput = buffer;
 
 	char *command = BuildCommand(test, target, testOutput);
 	if (command == NULL)
-		return;
+		return false;
 
-	system(command);
+	auto result = system(command);
+
+	if (result != 0)
+	{
+		printf("Command failed to execute:\n%s\n", command);
+		free(command);
+		return false;
+	}
 
 	free(command);
 
-	auto result = CompareResults(test->logFile, testOutput);
+	result = CompareResults(test->logFile, testOutput);
 
 	if (result != 0)
 	{
 		printf("*** Test failure: %s failed on line %i\n", test->demoName, result);
 		printf("Moving file %s to error folder.\n", testOutput);
 		MoveToErrorFolder(testOutput);
+		return false;
 	}
 	else
 	{
 		printf("Success: %s completed successfully.\n", test->demoName);
 		DeleteTestFile(testOutput);
+		return true;
 	}
 }
 
@@ -88,10 +133,14 @@ int main(int argc, char** argv)
 
 	printf("--- Running tests.\n");
 
+	bool success = true;
 	for (int i = 0; i < library->testCount; ++i)
 	{
-		RunTest(&library->test[i], target);
+		success = success && RunTest(&library->test[i], target);
 	}
+
+	printf("Test run was %s.\n", success ? "successful" : "not successful");
+	printf("--- Tests complete.\n");
 
 	getchar();
 	return 0;

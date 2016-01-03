@@ -34,11 +34,16 @@ void ReadTest(json::Value value, Test *test)
 
 	auto testConfig = value.ToObject();
 
+	assert(testConfig.HasKey("testname"), "Test must contain a property called 'testname'");
 	assert(testConfig.HasKey("demoname"), "Test must contain a property called 'demoname'");
 	assert(testConfig.HasKey("iwad"), "Test must contain a property called 'iwad'");
 	assert(testConfig.HasKey("logfile"), "Test must contain a property called 'logfile'");
 
-	auto v = testConfig["demoname"];
+	auto v = testConfig["testname"];
+	assert(v.GetType() == json::StringVal, "Test name must be of type string");
+	test->testName = strdup(v.ToString().c_str());
+
+	v = testConfig["demoname"];
 	assert(v.GetType() == json::StringVal, "Demo name must be of type string");
 	test->demoName = strdup(v.ToString().c_str());
 
@@ -85,7 +90,7 @@ Target *ReadTarget(const char *name)
 	target->iwads = (IWad **)malloc(sizeof(IWad*));
 	target->iwads[0] = (IWad *)malloc(sizeof(IWad));
 	target->iwads[0]->name = "doom2.wad";
-	target->iwads[0]->path = "C:\\Games\\Doom\\doom2.wad";
+	target->iwads[0]->path = "D:\\Games\\Doom\\doom2.wad";
 
 	return target;
 }
