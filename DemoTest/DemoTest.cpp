@@ -11,7 +11,7 @@ void assert(bool value, const char *message)
 		return;
 
 	printf("Error: %s\n", message);
-	getchar();
+	getch();
 	exit(-1);
 }
 
