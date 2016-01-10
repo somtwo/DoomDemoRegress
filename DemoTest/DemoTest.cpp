@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <conio.h>
+#include "qstring.h"
 #include "DemoTest.h"
 #include "Configuration.h"
 
@@ -15,7 +17,7 @@ void assert(bool value, char *message)
 
 char *BuildCommand(Test *test, Target *target, char* outputFile)
 {
-	char buffer[2048];
+	qstring buffer = qstring();
 	int i;
 
 	for (i = 0; i < target->iwadCount; ++i)
@@ -29,8 +31,8 @@ char *BuildCommand(Test *test, Target *target, char* outputFile)
 		return NULL;
 	}
 
-	sprintf(buffer, "\"%s\" -iwad %s %s %s %s %s %s", target->executable, target->iwads[i]->path, target->demoSwitch, test->demoName, target->logSwitch, outputFile, target->additionaloptions);
-	return strdup(buffer);
+	buffer.Printf(0, "\"%s\" -iwad %s %s %s %s %s %s", target->executable, target->iwads[i]->path, target->demoSwitch, test->demoName, target->logSwitch, outputFile, target->additionaloptions);
+	return buffer.duplicate();
 }
 
 int CompareResults(char *cannon, char *test)
@@ -74,7 +76,7 @@ int CompareResults(char *cannon, char *test)
 
 void MoveToErrorFolder(char *fileName)
 {
-
+	// TODO: Implement
 }
 
 void DeleteTestFile(char *fileName)
@@ -84,10 +86,10 @@ void DeleteTestFile(char *fileName)
 
 bool RunTest(Test *test, Target *target)
 {
-	char buffer[1024];
-	sprintf(buffer, "t_%s.txt", test->testName);
+	qstring buffer = qstring();
+	buffer.Printf(0, "t_%s.txt", test->testName);
 
-	char *testOutput = buffer;
+	char *testOutput = buffer.getBuffer();
 
 	char *command = BuildCommand(test, target, testOutput);
 	if (command == NULL)
@@ -134,15 +136,20 @@ int main(int argc, char** argv)
 	printf("--- Running tests.\n");
 
 	bool success = true;
+	int passedTests = 0;
 	for (int i = 0; i < library->testCount; ++i)
 	{
-		success = success && RunTest(&library->test[i], target);
+		bool result = RunTest(&library->test[i], target);
+		success = success && result;
+		if (result)
+			passedTests++;
 	}
 
-	printf("Test run was %s.\n", success ? "successful" : "not successful");
 	printf("--- Tests complete.\n");
+	printf("Test run was %s.\n", success ? "successful" : "not successful");
+	printf("%i out of %i tests passed.\n\n", passedTests, library->testCount);
 
-	getchar();
+	getch();
 	return 0;
 }
 

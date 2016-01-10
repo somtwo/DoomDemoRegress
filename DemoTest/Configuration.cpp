@@ -54,6 +54,8 @@ void ReadTest(json::Value value, Test *test)
 	v = testConfig["logfile"];
 	assert(v.GetType() == json::StringVal, "Log file must be of type string");
 	test->logFile = strdup(v.ToString().c_str());
+
+	// TODO: support pwads
 }
 
 TestLibrary *ReadLibrary(char *fileName)
@@ -79,7 +81,7 @@ TestLibrary *ReadLibrary(char *fileName)
 
 Target *ReadTarget(const char *name)
 {
-	// Hard code some values for now
+	// TODO: Actually read from the config file.
 	auto target = (Target *)malloc(sizeof(Target));
 	target->executable = "D:\\Games\\Doom\\Eternity\\eternity.exe";
 	target->demoSwitch = "-timedemo";
