@@ -16,7 +16,7 @@ char *ReadFile(FILE *f)
 	return buffer;
 }
 
-json::Value ReadJsonFile(char *name)
+json::Value ReadJsonFile(const char *name)
 {
 	printf("Reading %s\n", name);
 
@@ -81,13 +81,40 @@ TestLibrary *ReadLibrary(char *fileName)
 
 Target *ReadTarget(const char *name)
 {
-	// TODO: Actually read from the config file.
-	auto target = (Target *)malloc(sizeof(Target));
-	target->executable = "D:\\Games\\Doom\\Eternity\\eternity.exe";
-	target->demoSwitch = "-timedemo";
-	target->logSwitch = "-levellog";
-	target->additionaloptions = "-nodraw -nosound -nowait";
+	auto json = ReadJsonFile(name);
 
+	assert(json.GetType() == json::ObjectVal, "Target must be an object.");
+	auto targetObject = json.ToObject();
+
+	assert(targetObject.HasKey("executable"), "Target must contian property 'executable'");
+	assert(targetObject.HasKey("demoswitch"), "Target must contian property 'demoswitch'");
+	assert(targetObject.HasKey("logswitch"), "Target must contian property 'logswitch'");
+
+	auto target = (Target *)malloc(sizeof(Target));
+
+	auto exe = targetObject["executable"];
+	assert(exe.GetType() == json::StringVal, "executable must be of type String");
+
+	auto demoswitch = targetObject["demoswitch"];
+	assert(demoswitch.GetType() == json::StringVal, "demoswitch must be of type String");
+
+	auto logswitch = targetObject["logswitch"];
+	assert(logswitch.GetType() == json::StringVal, "logswitch must be of type String");
+
+	target->executable = strdup(exe.ToString().c_str());
+	target->demoSwitch = strdup(demoswitch.ToString().c_str());
+	target->logSwitch = strdup(logswitch.ToString().c_str());
+
+	if (targetObject.HasKey("additionaloptions"))
+	{
+		auto options = targetObject["additionaloptions"];
+		assert(options.GetType() == json::StringVal, "additionaloptions must be of type String");
+		target->additionaloptions = strdup(options.ToString().c_str());
+	}
+	else
+		target->additionaloptions = NULL;
+
+	// TODO: Read iwads from json blob
 	target->iwadCount = 1;
 	target->iwads = (IWad **)malloc(sizeof(IWad*));
 	target->iwads[0] = (IWad *)malloc(sizeof(IWad));
