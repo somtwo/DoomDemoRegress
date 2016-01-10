@@ -40,5 +40,5 @@ typedef struct
 	char *additionaloptions;
 } Target;
 
-void assert(bool value, char *message);
+void assert(bool value, const char *message);
 #endif

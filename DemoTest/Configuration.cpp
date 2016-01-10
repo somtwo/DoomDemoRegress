@@ -28,32 +28,26 @@ json::Value ReadJsonFile(const char *name)
 	return json::Deserialize(buffer);
 }
 
+char *ReadJsonString(json::Object &object, const char *name, const char *missingMessage, const char *typeMessage)
+{
+	assert(object.HasKey(name), missingMessage);
+
+	auto v = object[name];
+	assert(v.GetType() == json::StringVal, typeMessage);
+
+	return strdup(v.ToString().c_str());
+}
+
 void ReadTest(json::Value value, Test *test)
 {
 	assert(value.GetType() == json::ObjectVal, "Test must be an object");
 
 	auto testConfig = value.ToObject();
 
-	assert(testConfig.HasKey("testname"), "Test must contain a property called 'testname'");
-	assert(testConfig.HasKey("demoname"), "Test must contain a property called 'demoname'");
-	assert(testConfig.HasKey("iwad"), "Test must contain a property called 'iwad'");
-	assert(testConfig.HasKey("logfile"), "Test must contain a property called 'logfile'");
-
-	auto v = testConfig["testname"];
-	assert(v.GetType() == json::StringVal, "Test name must be of type string");
-	test->testName = strdup(v.ToString().c_str());
-
-	v = testConfig["demoname"];
-	assert(v.GetType() == json::StringVal, "Demo name must be of type string");
-	test->demoName = strdup(v.ToString().c_str());
-
-	v = testConfig["iwad"];
-	assert(v.GetType() == json::StringVal, "iwad must be of type string");
-	test->iWad = strdup(v.ToString().c_str());
-
-	v = testConfig["logfile"];
-	assert(v.GetType() == json::StringVal, "Log file must be of type string");
-	test->logFile = strdup(v.ToString().c_str());
+	test->testName = ReadJsonString(testConfig, "testname", "Test must contain a property called 'testname'", "testname must be of type String");
+	test->demoName = ReadJsonString(testConfig, "demoname", "Test must contain a property called 'demoname'", "demoname must be of type String");
+	test->iWad     = ReadJsonString(testConfig, "iwad",     "Test must contain a property called 'iwad'",     "iwad must be of type String");
+	test->logFile  = ReadJsonString(testConfig, "logfile",  "Test must contain a property called 'logfile'",  "logfile must be of type String");
 
 	// TODO: support pwads
 }
@@ -86,34 +80,20 @@ Target *ReadTarget(const char *name)
 	assert(json.GetType() == json::ObjectVal, "Target must be an object.");
 	auto targetObject = json.ToObject();
 
-	assert(targetObject.HasKey("executable"), "Target must contian property 'executable'");
-	assert(targetObject.HasKey("demoswitch"), "Target must contian property 'demoswitch'");
-	assert(targetObject.HasKey("logswitch"), "Target must contian property 'logswitch'");
-	assert(targetObject.HasKey("iwads"), "Target must contain property 'iwads'");
-
 	auto target = (Target *)malloc(sizeof(Target));
 
-	auto exe = targetObject["executable"];
-	assert(exe.GetType() == json::StringVal, "executable must be of type String");
-
-	auto demoswitch = targetObject["demoswitch"];
-	assert(demoswitch.GetType() == json::StringVal, "demoswitch must be of type String");
-
-	auto logswitch = targetObject["logswitch"];
-	assert(logswitch.GetType() == json::StringVal, "logswitch must be of type String");
-
-	target->executable = strdup(exe.ToString().c_str());
-	target->demoSwitch = strdup(demoswitch.ToString().c_str());
-	target->logSwitch = strdup(logswitch.ToString().c_str());
+	target->executable = ReadJsonString(targetObject, "executable", "Target must contain a property called 'executable'", "executable must be of type String");
+	target->demoSwitch = ReadJsonString(targetObject, "demoswitch", "Target must contain a property called 'demoswitch'", "demoswitch must be of type String");
+	target->logSwitch  = ReadJsonString(targetObject, "logswitch",  "Target must contain a property called 'logswitch'",  "logswitch must be of type String");
 
 	if (targetObject.HasKey("additionaloptions"))
 	{
-		auto options = targetObject["additionaloptions"];
-		assert(options.GetType() == json::StringVal, "additionaloptions must be of type String");
-		target->additionaloptions = strdup(options.ToString().c_str());
+		target->additionaloptions = ReadJsonString(targetObject, "additionaloptions", "How did you get this?", "additionaloptions must be of type String");
 	}
 	else
 		target->additionaloptions = NULL;
+
+	assert(targetObject.HasKey("iwads"), "Target must contain property 'iwads'");
 
 	auto iwads = targetObject["iwads"];
 	assert(iwads.GetType() == json::ObjectVal, "iwads must be of type Object");

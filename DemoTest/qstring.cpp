@@ -38,7 +38,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-void assert(bool value, char *message);
+void assert(bool value, const char *message);
 
 const size_t qstring::npos = ((size_t)-1);
 const size_t qstring::basesize = 16;

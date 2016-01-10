@@ -5,7 +5,7 @@
 #include "DemoTest.h"
 #include "Configuration.h"
 
-void assert(bool value, char *message)
+void assert(bool value, const char *message)
 {
 	if (value)
 		return;
