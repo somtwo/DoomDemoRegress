@@ -89,6 +89,7 @@ Target *ReadTarget(const char *name)
 	assert(targetObject.HasKey("executable"), "Target must contian property 'executable'");
 	assert(targetObject.HasKey("demoswitch"), "Target must contian property 'demoswitch'");
 	assert(targetObject.HasKey("logswitch"), "Target must contian property 'logswitch'");
+	assert(targetObject.HasKey("iwads"), "Target must contain property 'iwads'");
 
 	auto target = (Target *)malloc(sizeof(Target));
 
@@ -114,12 +115,25 @@ Target *ReadTarget(const char *name)
 	else
 		target->additionaloptions = NULL;
 
-	// TODO: Read iwads from json blob
-	target->iwadCount = 1;
-	target->iwads = (IWad **)malloc(sizeof(IWad*));
-	target->iwads[0] = (IWad *)malloc(sizeof(IWad));
-	target->iwads[0]->name = "doom2.wad";
-	target->iwads[0]->path = "D:\\Games\\Doom\\doom2.wad";
+	auto iwads = targetObject["iwads"];
+	assert(iwads.GetType() == json::ObjectVal, "iwads must be of type Object");
+
+	auto iwadsObj = iwads.ToObject();
+	assert(iwadsObj.size() > 0, "iwads must contain at least one iwad");
+
+	target->iwadCount = iwadsObj.size();
+	target->iwads = (IWad **)malloc(sizeof(IWad*) * target->iwadCount);
+
+	int i = 0;
+	for (auto it = iwadsObj.begin(); it != iwadsObj.end(); it++)
+	{
+		assert(it->second.GetType() == json::StringVal, "iwad path must be of type String");
+
+		target->iwads[i] = (IWad *)malloc(sizeof(IWad));
+		target->iwads[i]->name = strdup(it->first.c_str());
+		target->iwads[i]->path = strdup(it->second.ToString().c_str());
+		i++;
+	}
 
 	return target;
 }

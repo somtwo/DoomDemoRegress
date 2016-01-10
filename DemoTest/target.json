@@ -3,7 +3,7 @@
 	"demoswitch": "-timedemo",
 	"logswitch": "-levellog",
 	"additionaloptions": "-nodraw -nosound -nowait"
-	"iwads": [
+	"iwads": {
 		"doom2.wad": "D:\\games\\doom\\doom2.wad"
-	]
+	}
 }
